@@ -2,11 +2,12 @@ package com.aluracursos.libreria.principal;
 
 import com.aluracursos.libreria.model.Datos;
 import com.aluracursos.libreria.model.DatosLibros;
+import com.aluracursos.libreria.model.Libro;
 import com.aluracursos.libreria.service.ConsumoAPI;
 import com.aluracursos.libreria.service.ConvierteDatos;
 
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Principal {
 
@@ -14,6 +15,7 @@ public class Principal {
     private ConsumoAPI consumoAPI = new ConsumoAPI();
     private ConvierteDatos conversor = new ConvierteDatos();
     private Scanner teclado = new Scanner(System.in);
+    private List<DatosLibros> datosLibros=new ArrayList<>();
 
     public void muestraElmenu() {
 
@@ -41,7 +43,7 @@ public class Principal {
                     buscarLibroPorTitulo();
                     break;
                 case 2:
-                    //mostrarLibros();
+                    mostrarLibros();
                     break;
                 case 3:
                     //mostrarAutores();
@@ -65,7 +67,7 @@ public class Principal {
 
     }
 
-    private void buscarLibroPorTitulo() {
+    private DatosLibros getDatosLibro() {
         System.out.println("Ingrese el nombre del libro que desea buscar: ");
         var tituloLibro= teclado.nextLine();
          var json= consumoAPI.obtenerDatos(URL_BASE+"?search="+tituloLibro.replace(" ","+"));
@@ -75,10 +77,32 @@ public class Principal {
                 .findFirst();
         if(libroBuscado.isPresent()){
             System.out.println("Libro encontrado ");
-            System.out.println(libroBuscado.get());
+            DatosLibros dato=libroBuscado.get();
+            return dato;
         }else {
             System.out.println("Libro no encontrado");
+            return null;
         }
+
+    }
+    private void buscarLibroPorTitulo() {
+        DatosLibros datos=getDatosLibro();
+        if (datos!=null) {
+            datosLibros.add(datos);
+        }
+        System.out.println(datos);
+
+    }
+
+    private void mostrarLibros(){
+        List <Libro> libros= new ArrayList<>();
+        libros=datosLibros.stream()
+                .map(d->new Libro(d))
+                .collect(Collectors.toList());
+        libros.stream()
+                .sorted(Comparator.comparing(Libro::getTitulo))
+                .forEach(System.out::println);
+
 
     }
 }

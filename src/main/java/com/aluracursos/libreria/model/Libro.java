@@ -1,35 +1,54 @@
 package com.aluracursos.libreria.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
+import jakarta.persistence.*;
+import java.util.stream.Collectors;
 
-import java.util.List;
-
+@Entity
+@Table(name = "libros")
 public class Libro {
 
-    String titulo;
-    List<DatosAutor> autor;
-    List<String> idiomas;
-    Double numeroDeDescargas;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Column(unique = true)
+    private String titulo;
 
+    @Column
+    private String autores; // Almacenaremos los nombres de los autores separados por comas.
 
+    @Column
+    private String idiomas; // Almacenaremos los idiomas separados por comas.
 
+    @Column
+    private Double numeroDeDescargas;
 
-    public Libro(DatosLibros datosLibros){
-        this.titulo=datosLibros.titulo();
-        this.autor=datosLibros.autor();
-        this.idiomas=datosLibros.idiomas();
+    public Libro() {
+    }
 
+    public Libro(DatosLibros datosLibros) {
+        this.titulo = datosLibros.titulo();
+        this.autores = datosLibros.autor() != null
+                ? datosLibros.autor().stream()
+                .map(DatosAutor::nombre)
+                .collect(Collectors.joining(", "))
+                : null;
+        this.idiomas = datosLibros.idiomas() != null
+                ? String.join(", ", datosLibros.idiomas())
+                : null;
+        this.numeroDeDescargas = datosLibros.numeroDeDescargas();
     }
 
     @Override
     public String toString() {
-        return
+        return "Libro{" +
                 "titulo='" + titulo + '\'' +
-                ", autor=" + autor +
-                ", idiomas=" + idiomas +
-                ", numeroDeDescargas=" + numeroDeDescargas;
+                ", autores='" + autores + '\'' +
+                ", idiomas='" + idiomas + '\'' +
+                ", numeroDeDescargas=" + numeroDeDescargas +
+                '}';
     }
+
 
     public String getTitulo() {
         return titulo;
@@ -39,19 +58,19 @@ public class Libro {
         this.titulo = titulo;
     }
 
-    public List<DatosAutor> getAutor() {
-        return autor;
+    public String getAutor() {
+        return autores;
     }
 
-    public void setAutor(List<DatosAutor> autor) {
-        this.autor = autor;
+    public void setAutor(String autor) {
+        this.autores = autor;
     }
 
-    public List<String> getIdiomas() {
+    public String getIdiomas() {
         return idiomas;
     }
 
-    public void setIdiomas(List<String> idiomas) {
+    public void setIdiomas(String idiomas) {
         this.idiomas = idiomas;
     }
 

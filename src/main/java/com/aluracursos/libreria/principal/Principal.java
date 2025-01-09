@@ -3,6 +3,7 @@ package com.aluracursos.libreria.principal;
 import com.aluracursos.libreria.model.Datos;
 import com.aluracursos.libreria.model.DatosLibros;
 import com.aluracursos.libreria.model.Libro;
+import com.aluracursos.libreria.repository.LibrosRepository;
 import com.aluracursos.libreria.service.ConsumoAPI;
 import com.aluracursos.libreria.service.ConvierteDatos;
 
@@ -16,6 +17,12 @@ public class Principal {
     private ConvierteDatos conversor = new ConvierteDatos();
     private Scanner teclado = new Scanner(System.in);
     private List<DatosLibros> datosLibros=new ArrayList<>();
+
+    private  LibrosRepository repositorio;
+
+    public Principal(LibrosRepository repository) {
+        this.repositorio=repository;
+    }
 
     public void muestraElmenu() {
 
@@ -46,7 +53,7 @@ public class Principal {
                     mostrarLibros();
                     break;
                 case 3:
-                    //mostrarAutores();
+                    mostrarAutores();
                     break;
                 case 4:
                     //mostrarAutoresVivos();
@@ -88,20 +95,23 @@ public class Principal {
     private void buscarLibroPorTitulo() {
         DatosLibros datos=getDatosLibro();
         if (datos!=null) {
-            datosLibros.add(datos);
+          Libro libro=new Libro(datos);
+          repositorio.save(libro);
         }
         System.out.println(datos);
 
     }
 
     private void mostrarLibros(){
-        List <Libro> libros= new ArrayList<>();
-        libros=datosLibros.stream()
-                .map(d->new Libro(d))
-                .collect(Collectors.toList());
+        List <Libro> libros= repositorio.findAll();
         libros.stream()
                 .sorted(Comparator.comparing(Libro::getTitulo))
                 .forEach(System.out::println);
+
+
+    }
+    private void mostrarAutores(){
+
 
 
     }

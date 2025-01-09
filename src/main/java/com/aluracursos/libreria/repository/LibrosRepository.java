@@ -1,4 +1,9 @@
 package com.aluracursos.libreria.repository;
 
-public interface LibrosRepository {
+import com.aluracursos.libreria.model.Libro;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface LibrosRepository extends JpaRepository<Libro,Long> {
+
+
 }

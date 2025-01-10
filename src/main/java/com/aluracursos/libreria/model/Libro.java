@@ -1,6 +1,8 @@
 package com.aluracursos.libreria.model;
 
 import jakarta.persistence.*;
+
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
@@ -22,6 +24,8 @@ public class Libro {
 
     @Column
     private Double numeroDeDescargas;
+
+
 
     public Libro() {
     }

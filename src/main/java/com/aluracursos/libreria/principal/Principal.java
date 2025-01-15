@@ -1,9 +1,11 @@
 package com.aluracursos.libreria.principal;
 
 
+import com.aluracursos.libreria.model.Autor;
 import com.aluracursos.libreria.model.Datos;
 import com.aluracursos.libreria.model.DatosLibros;
 import com.aluracursos.libreria.model.Libro;
+import com.aluracursos.libreria.repository.AutorRepository;
 import com.aluracursos.libreria.repository.LibrosRepository;
 import com.aluracursos.libreria.service.ConsumoAPI;
 import com.aluracursos.libreria.service.ConvierteDatos;
@@ -19,10 +21,12 @@ public class Principal {
     private List<DatosLibros> datosLibros = new ArrayList<>();
 
     private LibrosRepository repositorio;
+    private AutorRepository autorRepository;
 
 
-    public Principal(LibrosRepository repository) {
+    public Principal(LibrosRepository repository, AutorRepository autorRepository) {
         this.repositorio = repository;
+        this.autorRepository=autorRepository;
     }
 
     public void muestraElmenu() {
@@ -52,10 +56,10 @@ public class Principal {
                     mostrarLibros();
                     break;
                 case 3:
-                   // mostrarAutores();
+                    mostrarAutores();
                     break;
                 case 4:
-                    //mostrarAutoresVivos();
+                    mostrarAutoresVivos();
                     break;
                 case 5:
 
@@ -96,7 +100,7 @@ public class Principal {
     private void buscarLibroPorTitulo() {
         DatosLibros datos = getDatosLibro();
         if (datos != null) {
-            Libro libro = new Libro(datos);
+            Libro libro = new Libro(datos, autorRepository);
             repositorio.save(libro);
         }
         System.out.println(datos);
@@ -111,6 +115,44 @@ public class Principal {
 
 
     }
+
+    private void mostrarAutores(){
+        List<Autor> autores = autorRepository.findAll();
+
+        autores.stream()
+                .sorted(Comparator.comparing(Autor::getNombre))
+                .forEach(a -> System.out.println("Nombre: " + a.getNombre()
+                        + ", Fecha de nacimiento: " + a.getFechaDeNacimiento()
+                        + ", Fecha de fallecimiento: " + a.getFechaDeMuerte()));
+    }
+
+    private void mostrarAutoresVivos() {
+        int anoSeleccionado;
+
+            System.out.println("Escribe el año (AAAA) que estás buscando: ");
+            while (!teclado.hasNextInt()) {
+                System.out.println("Entrada inválida. Por favor, ingresa un número entero.");
+                teclado.next();
+            }
+            anoSeleccionado = teclado.nextInt();
+            teclado.nextLine();
+
+            if (String.valueOf(anoSeleccionado).length() != 4) {
+                System.out.println("El año debe tener cuatro dígitos. Intenta de nuevo.");
+            }
+         while (String.valueOf(anoSeleccionado).length() != 4);
+
+        System.out.println("Año seleccionado: " + anoSeleccionado);
+        List<Autor> filtroAutores = autorRepository.buscarAutorVivoPorAno(anoSeleccionado);
+        filtroAutores.forEach(a ->
+                System.out.println("Nombre: " + a.getNombre()
+                        + ", Año de Nacimiento: " + a.getFechaDeNacimiento()
+                        + ", Año de Fallecimiento: " + a.getFechaDeMuerte()));
+    }
+
+
+
+
     private void mostrarLibroPorIdioma(){
         var opcion = """
                     Eliga el idioma de los libros que desea listar:

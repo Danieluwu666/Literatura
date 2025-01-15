@@ -1,8 +1,10 @@
 package com.aluracursos.libreria.model;
 
+import com.aluracursos.libreria.repository.AutorRepository;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
 @Entity
@@ -16,13 +18,12 @@ public class Libro {
     @Column(unique = true)
     private String titulo;
 
-    @Column
-    private String autores; // Almacenaremos los nombres de los autores separados por comas.
-
-    @Column
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_autor")
+    private Autor autor;
     private String idiomas; // Almacenaremos los idiomas separados por comas.
 
-    @Column
+
     private Double numeroDeDescargas;
 
 
@@ -30,24 +31,26 @@ public class Libro {
     public Libro() {
     }
 
-    public Libro(DatosLibros datosLibros) {
+    public Libro(DatosLibros datosLibros, AutorRepository autorRepository) {
         this.titulo = datosLibros.titulo();
-        this.autores = datosLibros.autor() != null
-                ? datosLibros.autor().stream()
-                .map(DatosAutor::nombre)
-                .collect(Collectors.joining(", "))
-                : null;
-        this.idiomas = datosLibros.idiomas() != null
-                ? String.join(", ", datosLibros.idiomas())
-                : null;
-        this.numeroDeDescargas = datosLibros.numeroDeDescargas();
+        if (!datosLibros.autor().isEmpty()) {
+            DatosAutor datosAutor = datosLibros.autor().get(0); // Tomamos el primer autor
+            Autor autor = autorRepository.findByNombre(datosAutor.nombre());
+            if (autor == null) { // Si el autor no existe, lo creamos
+                autor = new Autor(datosAutor);
+                autorRepository.save(autor);
+            }
+            this.autor = autor;
+        }
+        this.idiomas = datosLibros.idiomas().get(0);
+        this.numeroDeDescargas = OptionalDouble.of(datosLibros.numeroDeDescargas()).orElse(0);
     }
 
     @Override
     public String toString() {
         return "Libro{" +
                 "titulo='" + titulo + '\'' +
-                ", autores='" + autores + '\'' +
+                ", autores='" + autor + '\'' +
                 ", idiomas='" + idiomas + '\'' +
                 ", numeroDeDescargas=" + numeroDeDescargas +
                 '}';
@@ -62,12 +65,12 @@ public class Libro {
         this.titulo = titulo;
     }
 
-    public String getAutor() {
-        return autores;
+    public Autor getAutor() {
+        return autor;
     }
 
-    public void setAutor(String autor) {
-        this.autores = autor;
+    public void setAutor(Autor autor) {
+        this.autor = autor;
     }
 
     public String getIdiomas() {

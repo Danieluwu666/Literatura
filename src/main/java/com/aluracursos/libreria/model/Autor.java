@@ -4,32 +4,32 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "autores")
+@Table(name = "autor")
 public class Autor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+
     private String nombre;
 
-    @Column
+
     private String fechaDeNacimiento;
 
-    @Column
+
     private String fechaDeMuerte;
 
-    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Libro> libros;
 
     public Autor() {
     }
 
-    public Autor(String nombre, String fechaDeNacimiento, String fechaDeMuerte) {
-        this.nombre = nombre;
-        this.fechaDeNacimiento = fechaDeNacimiento;
-        this.fechaDeMuerte = fechaDeMuerte;
+    public Autor(DatosAutor datosAutor) {
+        this.nombre = datosAutor.nombre();
+        this.fechaDeNacimiento = datosAutor.fechaDeNacimiento();
+        this.fechaDeMuerte = datosAutor.fechaDeMuerte();
     }
 
 
@@ -64,5 +64,12 @@ public class Autor {
 
     public void setLibros(List<Libro> libros) {
         this.libros = libros;
+    }
+
+    @Override
+    public String toString() {
+        return "nombre='" + nombre + '\'' +
+                ", fechaDeNacimiento='" + fechaDeNacimiento + '\'' +
+                ", fechaDeFallecimiento='" + fechaDeMuerte;
     }
 }
